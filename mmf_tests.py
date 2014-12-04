@@ -130,6 +130,43 @@ class TestParagraphizeDirections(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestGetIngredientHeading(unittest.TestCase):
+    
+    def test_when_empty(self):
+        actual = mmf._get_ingredient_heading('')
+        expected = ''
+        self.assertEqual(actual, expected)
+    
+    def test_when_not_marked_up(self):
+        actual = mmf._get_ingredient_heading('This is some text.')
+        expected = ''
+        self.assertEqual(actual, expected)
+
+    def test_when_heading(self):
+        actual = mmf._get_ingredient_heading('---------------------------------SPAM---------------------------------')
+        expected = 'SPAM'
+        self.assertEqual(actual, expected)
+
+    def test_when_minimum(self):
+        actual = mmf._get_ingredient_heading('-----BAR-----')
+        expected = 'BAR'
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_heading(self):
+        actual = mmf._get_ingredient_heading('MMMMM---------------------------QUICK OATS--------------------------------')
+        expected = 'QUICK OATS'
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_minimum(self):
+        actual = mmf._get_ingredient_heading('MMMMM-----JARS-----')
+        expected = 'JARS'
+        self.assertEqual(actual, expected)
+
+    def test_when_spaces(self):
+        actual = mmf._get_ingredient_heading('-------------------------  This is a  heading.        --------------------------------')
+        expected = 'This is a  heading.'
+        self.assertEqual(actual, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
