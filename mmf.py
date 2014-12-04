@@ -419,17 +419,3 @@ def _paragraphize_directions(lines):
     if current:
         directions.append(current)
     return directions
-
-
-if __name__ == '__main__':
-    with open('c:/Code/python/recipe/.samples/v1.mmf', encoding='cp437') as v1:
-        print()
-        for recipe in list(parse_recipes(v1))[:]:
-            print('Title:       %s' % recipe.title)
-            print('Categories:  %s' % recipe.categories)
-            print('Yield:       %s' % recipe.yield_)
-            print('Servings:    %s' % recipe.servings)
-            print('Ingredients: %s' % recipe.ingredients)
-            print('Directions:  %s' % recipe.directions)
-            print()
-
