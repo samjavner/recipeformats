@@ -35,6 +35,24 @@ class TestSplitCategories(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestGetYieldAndServings(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mmf._get_yield_and_servings('')
+        expected = '', 0
+        self.assertEqual(actual, expected)
+
+    def test_when_number(self):
+        actual = mmf._get_yield_and_servings('10')
+        expected = '', 10
+        self.assertEqual(actual, expected)
+
+    def test_when_number_and_unit(self):
+        actual = mmf._get_yield_and_servings('24 cookies')
+        expected = '24 cookies', 0
+        self.assertEqual(actual, expected)
+
+
 class TestGetIngredientHeading(unittest.TestCase):
     
     def test_when_empty(self):
