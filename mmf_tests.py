@@ -241,5 +241,64 @@ class TestGetIngredient(unittest.TestCase):
         self.assertEqual(actual.is_heading, False)
 
 
+class TestIsIngredient(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mmf._is_ingredient('')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_direction(self):
+        actual = mmf._is_ingredient('In large bowl, blend oil and sugars on low until well mixed. Add')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_invalid_quantity(self):
+        actual = mmf._is_ingredient('     ab qt Milk')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_invalid_unit(self):
+        actual = mmf._is_ingredient('        21 Apples')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_spacing_off(self):
+        actual = mmf._is_ingredient('     1 qt Milk')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_1(self):
+        actual = mmf._is_ingredient('      1 qt Milk')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_2(self):
+        actual = mmf._is_ingredient('  1 1/2 c  Whipped cream')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_3(self):
+        actual = mmf._is_ingredient('      1    Vanilla bean')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_4(self):
+        actual = mmf._is_ingredient('           Raisins (optional)')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_5(self):
+        actual = mmf._is_ingredient('    1.5 qt Milk')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_6(self):
+        actual = mmf._is_ingredient('      1 c  Oil                                 1 t  Baking soda')
+        expected = True
+        self.assertEqual(actual, expected)
+
+
+
 if __name__ == '__main__':
     unittest.main()
