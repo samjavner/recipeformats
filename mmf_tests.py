@@ -3,6 +3,159 @@ import unittest
 import mmf
 
 
+class TestIsMmfHeader(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mmf._is_mmf_header('')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_normal(self):
+        actual = mmf._is_mmf_header('---------- Recipe via Meal-Master (tm) v8.05')
+        expected = True
+        self.assertEqual(actual, expected)
+    
+    def test_when_MMMMM(self):
+        actual = mmf._is_mmf_header('MMMMM----- Recipe via Meal-Master (tm) v8.05')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_mmmmm(self):
+        actual = mmf._is_mmf_header('mmmmm----- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_extra_dash(self):
+        actual = mmf._is_mmf_header('----------- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+    
+    def test_when_extra_M(self):
+        actual = mmf._is_mmf_header('MMMMMM----- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_missing_dash(self):
+        actual = mmf._is_mmf_header('--------- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+    
+    def test_when_missing_M(self):
+        actual = mmf._is_mmf_header('MMMM----- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_leading_space(self):
+        actual = mmf._is_mmf_header(' ---------- Recipe via Meal-Master (tm) v8.05')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_trailing_space(self):
+        actual = mmf._is_mmf_header('---------- Recipe via Meal-Master (tm) v8.05 ')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_only_dashes(self):
+        actual = mmf._is_mmf_header('----------')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_only_dashes_and_space(self):
+        actual = mmf._is_mmf_header('---------- ')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_other_text(self):
+        actual = mmf._is_mmf_header('---------- Anything goes here')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_only_MMMMM_and_dashes(self):
+        actual = mmf._is_mmf_header('MMMMM-----')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_only_MMMMM_and_dashes_and_space(self):
+        actual = mmf._is_mmf_header('MMMMM----- ')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_other_text(self):
+        actual = mmf._is_mmf_header('MMMMM----- Anything goes here')
+        expected = True
+        self.assertEqual(actual, expected)
+
+
+class TestIsMmfFooter(unittest.TestCase):
+
+    # only '-----' and 'MMMMM' should be considerd valid
+
+    def test_when_normal(self):
+        actual = mmf._is_mmf_footer('-----')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM(self):
+        actual = mmf._is_mmf_footer('MMMMM')
+        expected = True
+        self.assertEqual(actual, expected)
+
+    def test_when_empty(self):
+        actual = mmf._is_mmf_footer('')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_leading_space(self):
+        actual = mmf._is_mmf_footer(' -----')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_trailing_space(self):
+        actual = mmf._is_mmf_footer('----- ')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_extra_dash(self):
+        actual = mmf._is_mmf_footer('------')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_missing_dash(self):
+        actual = mmf._is_mmf_footer('----')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_trailing_text(self):
+        actual = mmf._is_mmf_footer('-----TEXT')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_leading_space(self):
+        actual = mmf._is_mmf_footer(' MMMMM')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_trailing_space(self):
+        actual = mmf._is_mmf_footer('MMMMM ')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_extra_M(self):
+        actual = mmf._is_mmf_footer('MMMMMM')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_missing_M(self):
+        actual = mmf._is_mmf_footer('MMMM')
+        expected = False
+        self.assertEqual(actual, expected)
+
+    def test_when_MMMMM_trailing_text(self):
+        actual = mmf._is_mmf_footer('MMMMMTEXT')
+        expected = False
+        self.assertEqual(actual, expected)
+
+
 class TestTestMetadata(unittest.TestCase):
 
     def test_when_empty(self):
