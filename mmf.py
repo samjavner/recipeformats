@@ -56,6 +56,8 @@ class Ingredient:
 
     def __repr__(self):
         """Returns representation of ingredient (different for heading or not)."""
+        # Tests rely on this representation format, so think again before
+        # changing this format.
         if self.is_heading:
             r = '----- %s -----' % self.text 
         else:

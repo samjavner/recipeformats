@@ -325,6 +325,204 @@ class TestGetIngredients(unittest.TestCase):
         actual = [repr(i) for i in mmf._get_ingredients(lines)]
         self.assertEqual(actual, expected)
 
+    def test_when_one_column(self):
+        lines = [
+            ('      1 qt Milk', False),
+            ('      1 pt Heavy cream', False),
+            ('    1/2 ts Salt', False),
+            ('      1    Vanilla bean', False),
+            ('    3/4 c  Long-grained rice', False),
+            ('      1 c  Granulated sugar', False),
+            ('      1    Egg yolk', False),
+            ('  1 1/2 c  Whipped cream', False),
+            ('           Raisins (optional)', False),
+            ]
+        expected = [
+            '{1} {qt} {Milk}',
+            '{1} {pt} {Heavy cream}',
+            '{1/2} {ts} {Salt}',
+            '{1} {} {Vanilla bean}',
+            '{3/4} {c} {Long-grained rice}',
+            '{1} {c} {Granulated sugar}',
+            '{1} {} {Egg yolk}',
+            '{1 1/2} {c} {Whipped cream}',
+            '{} {} {Raisins (optional)}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_one_column_with_extra_lines(self):
+        lines = [
+            ('  ', False),
+            ('      1 qt Milk', False),
+            ('      1 pt Heavy cream', False),
+            ('    1/2 ts Salt', False),
+            ('      1    Vanilla bean', False),
+            ('    3/4 c  Long-grained rice', False),
+            ('  ', False),
+            ('      1 c  Granulated sugar', False),
+            ('      1    Egg yolk', False),
+            ('  1 1/2 c  Whipped cream', False),
+            ('           Raisins (optional)', False),
+            ('  ', False),
+            ]
+        expected = [
+            '{1} {qt} {Milk}',
+            '{1} {pt} {Heavy cream}',
+            '{1/2} {ts} {Salt}',
+            '{1} {} {Vanilla bean}',
+            '{3/4} {c} {Long-grained rice}',
+            '{1} {c} {Granulated sugar}',
+            '{1} {} {Egg yolk}',
+            '{1 1/2} {c} {Whipped cream}',
+            '{} {} {Raisins (optional)}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_one_column_with_headings(self):
+        lines = [
+            ('FOR THE PIE', True),
+            ('  1 1/2 c  All-Purpose Flour', False),
+            ('    1/2 ts Salt', False),
+            ('    1/2 c  Shortening', False),
+            ('      5 tb ICE Water', False),
+            ('      8 c  Apples [peeled & sliced]', False),
+            ('    1/4 c  Granulated Sugar', False),
+            ('      2 tb All-Purpose Flour', False),
+            ('    1/2 ts Nutmeg, Ground', False),
+            ('      2 tb Lemon Juice', False),
+            ('      1 ts Cinnamon, Ground', False),
+            ('', False),
+            ('FOR THE TOPPING', True),
+            ('    1/2 c  Granulated Sugar', False),
+            ('    1/2 c  All-Purpose Flour', False),
+            ('    1/3 c  Butter', False),
+            ('      1 lg Paper Bag', False),
+            ('           Vanilla Ice Cream', False),
+            ]
+        expected = [
+            '----- FOR THE PIE -----',
+            '{1 1/2} {c} {All-Purpose Flour}',
+            '{1/2} {ts} {Salt}',
+            '{1/2} {c} {Shortening}',
+            '{5} {tb} {ICE Water}',
+            '{8} {c} {Apples [peeled & sliced]}',
+            '{1/4} {c} {Granulated Sugar}',
+            '{2} {tb} {All-Purpose Flour}',
+            '{1/2} {ts} {Nutmeg, Ground}',
+            '{2} {tb} {Lemon Juice}',
+            '{1} {ts} {Cinnamon, Ground}',
+            '----- FOR THE TOPPING -----',
+            '{1/2} {c} {Granulated Sugar}',
+            '{1/2} {c} {All-Purpose Flour}',
+            '{1/3} {c} {Butter}',
+            '{1} {lg} {Paper Bag}',
+            '{} {} {Vanilla Ice Cream}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_two_columns(self):
+        lines = [
+            ('  1 1/2 lb Hamburger                           1 ds Salt', False),
+            ('      1 c  Onion; chopped                    1/2 c  Water', False),
+            ('      1 c  Green pepper; chopped             1/8 t  Hot pepper sauce', False),
+            ('      1 T  Oil                           ', False),
+            ]
+        expected = [
+            '{1 1/2} {lb} {Hamburger}',
+            '{1} {c} {Onion; chopped}',
+            '{1} {c} {Green pepper; chopped}',
+            '{1} {T} {Oil}',
+            '{1} {ds} {Salt}',
+            '{1/2} {c} {Water}',
+            '{1/8} {t} {Hot pepper sauce}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_two_columns_with_headings(self):
+        lines = [
+            ('HEADING 1', True),
+            ('  1 1/2 lb Hamburger                           1 ds Salt', False),
+            ('      1 c  Onion; chopped                    1/2 c  Water', False),
+            ('HEADING 2', True),
+            ('      1 c  Green pepper; chopped             1/8 t  Hot pepper sauce', False),
+            ('      1 T  Oil                           ', False),
+            ('HEADING 3', True),
+            ('      7 oz Jack/Mozz. cheese slices          1/2 c  Parmesan cheese; grated', False),
+            ]
+        expected = [
+            '----- HEADING 1 -----',
+            '{1 1/2} {lb} {Hamburger}',
+            '{1} {c} {Onion; chopped}',
+            '{1} {ds} {Salt}',
+            '{1/2} {c} {Water}',
+            '----- HEADING 2 -----',
+            '{1} {c} {Green pepper; chopped}',
+            '{1} {T} {Oil}',
+            '{1/8} {t} {Hot pepper sauce}',
+            '----- HEADING 3 -----',
+            '{7} {oz} {Jack/Mozz. cheese slices}',
+            '{1/2} {c} {Parmesan cheese; grated}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_one_column_with_line_continuations(self):
+        lines = [
+            ('      1 ts Salt', False),
+            ('           Fresh ground', False),
+            ('           -black pepper to', False),
+            ('           -taste', False),
+            ('      1 cn (6-oz) tomato paste', False),
+            ('      1 cn (30-oz) red kidney beans', False),
+            ('           -drained', False),
+            ]
+        expected = [
+            '{1} {ts} {Salt}',
+            '{} {} {Fresh ground black pepper to taste}',
+            '{1} {cn} {(6-oz) tomato paste}',
+            '{1} {cn} {(30-oz) red kidney beans drained}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_two_columns_with_line_continuations(self):
+        lines = [
+            ('      1 lg Artichoke; -=OR=-                        - and thinly sliced', False),
+            ('      2 md -Artichokes                         6    Leaves butter lettuce', False),
+            ('      1 c  Water; acidulated with                   - sliced into 1/4" strips', False),
+            ('           - the juice of                           -=OR=- a handful of', False),
+            ('      1    Lemon                                    - Sorrel leaves, sliced', False),
+            ('      2    Garlic cloves                       1 tb Chopped parsley', False),
+            ('      1 tb Virgin olive oil                    2    Mint leaves; chopped', False),
+            ('      1 lg Leek; white part only -=OR=-             Salt', False),
+            ('      2 md Leeks, white part only          5 1/2 c  Water', False),
+            ('           - washed and sliced                 1 lb Fresh peas; shucked, -=OR=-', False),
+            ('      1 sm New potato; quartered               1 c  -Frozen peas', False),
+            ]
+        expected = [
+            '{1} {lg} {Artichoke; -=OR=-}',
+            '{2} {md} {-Artichokes}',
+            '{1} {c} {Water; acidulated with the juice of',
+            '{1} {} {Lemon}',
+            '{2} {} {Garlic cloves}',
+            '{1} {tb} {Virgin olive oil}',
+            '{1} {lg} {Leek; white part only -=OR=-',
+            '{2} {md} {Leeks, white part only washed and sliced}',
+            '{1} {sm} {New potato; quartered and thinly sliced}',
+            '{6} {} {Leaves butter lettuce sliced into 1/4" strips =OR=- a handful of Sorrel leaves, sliced}',
+            '{1} {tb} {Chopped parsley}',
+            '{2} {} {Mint leaves; chopped}',
+            '{} {} {Salt}',
+            '{5 1/2} {c} {Water}',
+            '{1} {lb} {Fresh peas; shucked, -=OR=-}',
+            '{1} {c} {-Frozen peas}',
+            ]
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
 
 
 if __name__ == '__main__':
