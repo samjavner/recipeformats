@@ -16,7 +16,398 @@ class TestParseRecipe(unittest.TestCase):
         self.assertEqual(actual_ingredients, expected_ingredients)
         self.assertEqual(actual.directions, expected_directions)
 
-    def test_two_column(self):
+    # Variations on this recipe follow it.
+    def test_when_one_column(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            ' ',
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ' ',
+            '-----',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_no_ingredients_or_directions(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            ' ',
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            ' ',
+            '-----',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = []
+        expected_directions = []
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_extra_empty_lines(self):
+        lines = [
+            ' ',
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            ' ',
+            '      Title: Potato Casserole',
+            ' ',
+            ' ',
+            ' ',
+            ' Categories: Casserole, Potato',
+            ' ',
+            ' ',
+            '      Yield: 8 Servings',
+            ' ',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            ' ',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            ' ',
+            ' ',
+            '  Recipe by: From recipe files of Martha',
+            ' ',
+            '-----',
+            ' ',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_missing_typical_empty_lines(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            '-----',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_missing_header_and_footer(self):
+        lines = [
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_missing_header_footer_and_title(self):
+        lines = [
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ]
+        expected_title = ''
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_missing_header_footer_and_categories(self):
+        lines = [
+            '      Title: Potato Casserole',
+            '      Yield: 8 Servings',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = []
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_missing_header_footer_and_yield(self):
+        lines = [
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            ' ',
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 0
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_only_ingredients_and_directions(self):
+        lines = [
+            '      2 lb Frozen hash brown potatoes',
+            '      1 c  Onions; diced',
+            '      1 cn Cream of chicken soup',
+            '     16 oz Sour cream',
+            '    1/2 c  Melted margarine',
+            '      8 oz Grated sharp cheese',
+            '           Salt and pepper to taste',
+            '',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ]
+        expected_title = ''
+        expected_categories = []
+        expected_yield = ''
+        expected_servings = 0
+        expected_ingredients = [
+            '{2} {lb} {Frozen hash brown potatoes}',
+            '{1} {c} {Onions; diced}',
+            '{1} {cn} {Cream of chicken soup}',
+            '{16} {oz} {Sour cream}',
+            '{1/2} {c} {Melted margarine}',
+            '{8} {oz} {Grated sharp cheese}',
+            '{} {} {Salt and pepper to taste}',
+            ]
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_no_ingredients(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            ' ',
+            '      Title: Potato Casserole',
+            ' Categories: Casserole, Potato',
+            '      Yield: 8 Servings',
+            ' ',
+            '  Thaw potatoes about 30 min., then mix all ingredients in a large bowl.',
+            '  Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            '  ',
+            '  Recipe by: From recipe files of Martha',
+            ' ',
+            '-----',
+            ]
+        expected_title = 'Potato Casserole'
+        expected_categories = ['Casserole', 'Potato']
+        expected_yield = ''
+        expected_servings = 8
+        expected_ingredients = []
+        expected_directions = [
+            'Thaw potatoes about 30 min., then mix all ingredients in a large bowl. Place in a 9 X 13 baking dish. Bake at 350 for one hour. Serves 8',
+            'Recipe by: From recipe files of Martha',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_two_column(self):
         lines = [
             'MMMMM----- Recipe via Meal-Master (tm) v8.02',
             ' ',
@@ -60,6 +451,51 @@ class TestParseRecipe(unittest.TestCase):
         expected_directions = [
             'This is a rather rustic soup. For a more refined version, pass it through a food mill before serving.',
         ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_empty(self):
+        lines = []
+        expected_title = ''
+        expected_categories = []
+        expected_yield = ''
+        expected_servings = 0
+        expected_ingredients = []
+        expected_directions = []
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_only_header(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            ]
+        expected_title = ''
+        expected_categories = []
+        expected_yield = ''
+        expected_servings = 0
+        expected_ingredients = []
+        expected_directions = []
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+    def test_when_only_header_and_footer(self):
+        lines = [
+            '---------- Recipe via Meal-Master (tm) v8.05',
+            '-----',
+            'Extra text that should not be included',
+            ]
+        expected_title = ''
+        expected_categories = []
+        expected_yield = ''
+        expected_servings = 0
+        expected_ingredients = []
+        expected_directions = []
         actual = mmf.parse_recipe(lines)
         self.assert_equal(actual, expected_title, expected_categories,
                           expected_yield, expected_servings,
