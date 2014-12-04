@@ -166,12 +166,18 @@ def _test_metadata(line):
     """Returns a tuple indicating whether a line contains recipe metadata
     as well as the attribute name and value.
 
-    A line is considered to contain recipe metadata if it contains a colon.
-    The attribute name comes before the colon and the value comes after.
+    A line is considered to contain recipe metadata if it contains a colon
+    and also contains some non-whitespace before the colon. The attribute name
+    comes before the colon and the value comes after.
     """
     index = line.find(':')
     if index >= 0:
-        return True, line[:index].strip(), line[index+1:].strip()
+        attribute = line[:index].strip()
+        value = line[index+1:].strip()
+        if attribute:
+            return True, attribute, value
+        else:
+            return False, '', ''
     else:
         return False, '', ''
 
