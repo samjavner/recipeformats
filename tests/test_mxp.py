@@ -1,6 +1,6 @@
 import unittest
 
-import mxp
+from recipeformats import mxp
 
 
 class TestTestMetadata(unittest.TestCase):

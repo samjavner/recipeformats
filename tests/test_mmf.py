@@ -1,6 +1,6 @@
 import unittest
 
-import mmf
+from recipeformats import mmf
 
 
 class TestParseRecipe(unittest.TestCase):
