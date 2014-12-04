@@ -299,6 +299,33 @@ class TestIsIngredient(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestGetIngredients(unittest.TestCase):
+
+    def test_when_none(self):
+        lines = []
+        expected = []
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_empty_line(self):
+        lines = [
+            ('  ', False),
+            ]
+        expected = []
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+    def test_when_empty_lines(self):
+        lines = [
+            ('  ', False),
+            ('  ', False),
+            ('  ', False),
+            ]
+        expected = []
+        actual = [repr(i) for i in mmf._get_ingredients(lines)]
+        self.assertEqual(actual, expected)
+
+
 
 if __name__ == '__main__':
     unittest.main()
