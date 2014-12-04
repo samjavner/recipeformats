@@ -74,6 +74,44 @@ class TestIsMxpFooter(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestTestMetadata(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mxp._test_metadata('')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_colon(self):
+        actual = mxp._test_metadata(':')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_no_attribute_name(self):
+        actual = mxp._test_metadata('    : value')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_text_without_colon(self):
+        actual = mxp._test_metadata('   Chill before serving.   ')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_no_value(self):
+        actual = mxp._test_metadata(' Recipe By: ')
+        expected = True, 'Recipe By', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_normal(self):
+        actual = mxp._test_metadata('Recipe By     : Sam')
+        expected = True, 'Recipe By', 'Sam'
+        self.assertEqual(actual, expected)
+
+    def test_when_extra_spaces(self):
+        actual = mxp._test_metadata('    Recipe   By     :     Aunt   Salli   ')
+        expected = True, 'Recipe   By', 'Aunt   Salli'
+        self.assertEqual(actual, expected)
+
+
 class TestTestServingSizePreparationTime(unittest.TestCase):
 
     def test_when_empty(self):
@@ -137,41 +175,51 @@ class TestTestServingSizePreparationTime(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
-class TestTestMetadata(unittest.TestCase):
+class TestTestCategories(unittest.TestCase):
 
     def test_when_empty(self):
-        actual = mxp._test_metadata('')
+        actual = mxp._test_categories('')
         expected = False, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_colon(self):
-        actual = mxp._test_metadata(':')
+    def test_when_15_spaces(self):
+        actual = mxp._test_categories('               ')
         expected = False, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_no_attribute_name(self):
-        actual = mxp._test_metadata('    : value')
+    def test_when_16_spaces(self):
+        actual = mxp._test_categories('                ')
         expected = False, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_text_without_colon(self):
-        actual = mxp._test_metadata('   Chill before serving.   ')
+    def test_when_17_spaces(self):
+        actual = mxp._test_categories('                 ')
         expected = False, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_no_value(self):
-        actual = mxp._test_metadata(' Recipe By: ')
-        expected = True, 'Recipe By', ''
+    def test_when_48_spaces(self):
+        actual = mxp._test_categories('                                                ')
+        expected = False, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_normal(self):
-        actual = mxp._test_metadata('Recipe By     : Sam')
-        expected = True, 'Recipe By', 'Sam'
+    def test_when_no_categories(self):
+        actual = mxp._test_categories('Categories    : ')
+        expected = True, '', ''
         self.assertEqual(actual, expected)
 
-    def test_when_extra_spaces(self):
-        actual = mxp._test_metadata('    Recipe   By     :     Aunt   Salli   ')
-        expected = True, 'Recipe   By', 'Aunt   Salli'
+    def test_when_one_category_1(self):
+        actual = mxp._test_categories('Categories    : Bread Machine')
+        expected = True, 'Bread Machine', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_one_category_2(self):
+        actual = mxp._test_categories('Categories    : Bread Machine                   Nuts')
+        expected = True, 'Bread Machine', 'Nuts'
+        self.assertEqual(actual, expected)
+
+    def test_when_two_categories_2(self):
+        actual = mxp._test_categories('                Bread Machine                   Nuts')
+        expected = True, 'Bread Machine', 'Nuts'
         self.assertEqual(actual, expected)
 
 
