@@ -296,7 +296,7 @@ def _get_ingredient_heading(line):
     match = _heading_re.match(line)
     if not match:
         return ''
-    return match.group(1)
+    return match.group(1).strip()
 
 
 def _get_ingredients(line_pairs):
