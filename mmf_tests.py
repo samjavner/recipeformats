@@ -2,6 +2,45 @@ import unittest
 
 import mmf
 
+
+class TestTestMetadata(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mmf._test_metadata('')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_colon(self):
+        actual = mmf._test_metadata(':')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_no_attribute_name(self):
+        actual = mmf._test_metadata('    : value')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_text_without_colon(self):
+        actual = mmf._test_metadata('   Chill before serving.   ')
+        expected = False, '', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_no_value(self):
+        actual = mmf._test_metadata(' Categories: ')
+        expected = True, 'Categories', ''
+        self.assertEqual(actual, expected)
+
+    def test_when_normal(self):
+        actual = mmf._test_metadata(' Title: 21 Club Rice Pudding')
+        expected = True, 'Title', '21 Club Rice Pudding'
+        self.assertEqual(actual, expected)
+
+    def test_when_extra_spaces(self):
+        actual = mmf._test_metadata('    Recipe   By     :     Aunt   Salli   ')
+        expected = True, 'Recipe   By', 'Aunt   Salli'
+        self.assertEqual(actual, expected)
+
+
 class TestSplitCategories(unittest.TestCase):
 
     def test_when_none(self):
