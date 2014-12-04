@@ -3,6 +3,69 @@ import unittest
 import mmf
 
 
+class TestParseRecipe(unittest.TestCase):
+
+    def assert_equal(self, actual, expected_title, expected_categories,
+                     expected_yield, expected_servings, expected_ingredients,
+                     expected_directions):
+        actual_ingredients = [repr(i) for i in actual.ingredients]
+        self.assertEqual(actual.title, expected_title)
+        self.assertEqual(actual.categories, expected_categories)
+        self.assertEqual(actual.yield_, expected_yield)
+        self.assertEqual(actual.servings, expected_servings)
+        self.assertEqual(actual_ingredients, expected_ingredients)
+        self.assertEqual(actual.directions, expected_directions)
+
+    def test_two_column(self):
+        lines = [
+            'MMMMM----- Recipe via Meal-Master (tm) v8.02',
+            ' ',
+            '      Title: Potato-Sorrel Soup',
+            ' Categories: Soup/stew, Vegetarian',
+            '      Yield: 6 servings',
+            ' ',
+            '      4 tb Butter                            1/2 ts Salt (to taste)',
+            '      7 c  Water                           1 1/2 lb Red potatoes; quartered',
+            '      3 md Leeks; the white parts only              - lengthwise & thinly sliced',
+            '           - chopped or cut                         Freshly ground pepper',
+            '           - into 1/4-inch rounds                   Creme fraiche',
+            'MMMMM--------------------------HEADING-------------------------------',
+            '      6 c  Loosely packed sorrel leaves        1 tb Chives',
+            '           -the stems removed and                   - thinly sliced or snipped',
+            '           - leaves roughly chopped       ',
+            'MMMMM--------------------------HEADING-------------------------------',
+            ' ',
+            '  This is a rather rustic soup. For a more refined version, pass it',
+            '  through a food mill before serving.',
+            ' ',
+            'MMMMM'
+            ]
+        expected_title = 'Potato-Sorrel Soup'
+        expected_categories = ['Soup/stew', 'Vegetarian']
+        expected_yield = ''
+        expected_servings = 6
+        expected_ingredients = [
+            '{4} {tb} {Butter}',
+            '{7} {c} {Water}',
+            '{3} {md} {Leeks; the white parts only chopped or cut into 1/4-inch rounds}',
+            '{1/2} {ts} {Salt (to taste)}',
+            '{1 1/2} {lb} {Red potatoes; quartered lengthwise & thinly sliced}',
+            '{} {} {Freshly ground pepper}',
+            '{} {} {Creme fraiche}',
+            '----- HEADING -----',
+            '{6} {c} {Loosely packed sorrel leaves the stems removed and leaves roughly chopped}',
+            '{1} {tb} {Chives thinly sliced or snipped}',
+            '----- HEADING -----',
+            ]
+        expected_directions = [
+            'This is a rather rustic soup. For a more refined version, pass it through a food mill before serving.',
+        ]
+        actual = mmf.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_categories,
+                          expected_yield, expected_servings,
+                          expected_ingredients, expected_directions)
+
+
 class TestIsMmfHeader(unittest.TestCase):
 
     def test_when_empty(self):
