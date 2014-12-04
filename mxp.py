@@ -311,6 +311,8 @@ _ingredient_re = re.compile(r'^  ([\d\./ ]{6})  (.{12})  (.*)')
 
 def _test_ingredient(line):
     """Tests whether a line is an ingredient. Returns an Ingredient object or None."""
+    if not line.strip():
+        return None
     match = _ingredient_re.match(line)
     if match:
         amount = match.group(1).strip()
