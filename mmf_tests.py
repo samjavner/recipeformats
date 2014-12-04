@@ -168,5 +168,78 @@ class TestGetIngredientHeading(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestGetIngredient(unittest.TestCase):
+
+    def test_when_empty(self):
+        actual = mmf._get_ingredient('')
+        self.assertEqual(actual.quantity, '')
+        self.assertEqual(actual.unit, '')
+        self.assertEqual(actual.text, '')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_when_whitespace(self):
+        actual = mmf._get_ingredient('                   ')
+        self.assertEqual(actual.quantity, '')
+        self.assertEqual(actual.unit, '')
+        self.assertEqual(actual.text, '')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_1(self):
+        actual = mmf._get_ingredient('      1 qt Milk')
+        self.assertEqual(actual.quantity, '1')
+        self.assertEqual(actual.unit, 'qt')
+        self.assertEqual(actual.text, 'Milk')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_2(self):
+        actual = mmf._get_ingredient('    1/2 qt Milk')
+        self.assertEqual(actual.quantity, '1/2')
+        self.assertEqual(actual.unit, 'qt')
+        self.assertEqual(actual.text, 'Milk')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_3(self):
+        actual = mmf._get_ingredient('  3 1/2 qt Milk')
+        self.assertEqual(actual.quantity, '3 1/2')
+        self.assertEqual(actual.unit, 'qt')
+        self.assertEqual(actual.text, 'Milk')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_4(self):
+        actual = mmf._get_ingredient('    1.5 qt Milk')
+        self.assertEqual(actual.quantity, '1.5')
+        self.assertEqual(actual.unit, 'qt')
+        self.assertEqual(actual.text, 'Milk')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_5(self):
+        actual = mmf._get_ingredient('     .5 qt Milk')
+        self.assertEqual(actual.quantity, '.5')
+        self.assertEqual(actual.unit, 'qt')
+        self.assertEqual(actual.text, 'Milk')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_6(self):
+        actual = mmf._get_ingredient('    3/4 c  Long-grained rice')
+        self.assertEqual(actual.quantity, '3/4')
+        self.assertEqual(actual.unit, 'c')
+        self.assertEqual(actual.text, 'Long-grained rice')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_7(self):
+        actual = mmf._get_ingredient('           Raisins (optional)')
+        self.assertEqual(actual.quantity, '')
+        self.assertEqual(actual.unit, '')
+        self.assertEqual(actual.text, 'Raisins (optional)')
+        self.assertEqual(actual.is_heading, False)
+
+    def test_8(self):
+        actual = mmf._get_ingredient('      1    Egg yolk')
+        self.assertEqual(actual.quantity, '1')
+        self.assertEqual(actual.unit, '')
+        self.assertEqual(actual.text, 'Egg yolk')
+        self.assertEqual(actual.is_heading, False)
+
+
 if __name__ == '__main__':
     unittest.main()
