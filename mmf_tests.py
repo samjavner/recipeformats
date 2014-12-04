@@ -506,11 +506,11 @@ class TestGetIngredients(unittest.TestCase):
         expected = [
             '{1} {lg} {Artichoke; -=OR=-}',
             '{2} {md} {-Artichokes}',
-            '{1} {c} {Water; acidulated with the juice of',
+            '{1} {c} {Water; acidulated with the juice of}',
             '{1} {} {Lemon}',
             '{2} {} {Garlic cloves}',
             '{1} {tb} {Virgin olive oil}',
-            '{1} {lg} {Leek; white part only -=OR=-',
+            '{1} {lg} {Leek; white part only -=OR=-}',
             '{2} {md} {Leeks, white part only washed and sliced}',
             '{1} {sm} {New potato; quartered and thinly sliced}',
             '{6} {} {Leaves butter lettuce sliced into 1/4" strips =OR=- a handful of Sorrel leaves, sliced}',
