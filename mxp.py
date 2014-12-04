@@ -257,11 +257,17 @@ def _parse_categories(it, current, recipe):
 def _test_categories(line):
     """Returns a tuple indicating whether the line contained categories, the
     value of category 1, and the value of category 2."""
-    if (line.lower().startswith('categories    : ')
-        or line.startswith('                ')):
+    if line.lower().startswith('categories    : '):
         category1 = line[16:48].strip()
         category2 = line[48:].strip()
         return True, category1, category2
+    elif line.startswith('                '):
+        category1 = line[16:48].strip()
+        category2 = line[48:].strip()
+        if category1:
+            return True, category1, category2
+        else:
+            return False, '', ''
     else:
         return False, '', ''
 
