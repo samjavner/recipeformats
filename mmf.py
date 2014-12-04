@@ -218,12 +218,12 @@ def _parse_yield(it, current, recipe):
     current = _skip_empty(it, current)
     is_metadata, attribute, value = _test_metadata(current)
     if is_metadata and attribute.lower() in ['servings', 'yield']:
-        recipe.yield_, recipe.servings = _get_servings_and_yield(value)
+        recipe.yield_, recipe.servings = _get_yield_and_servings(value)
         current = next(it)
     return current
 
 
-def _get_servings_and_yield(value):
+def _get_yield_and_servings(value):
     """Returns a tuple consisting of the yield value and servings value.
 
     Only one of these has a meaningful value while the other is set to a
