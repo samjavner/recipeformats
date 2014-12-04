@@ -223,5 +223,93 @@ class TestTestCategories(unittest.TestCase):
         self.assertEqual(actual, expected)
 
 
+class TestTestIngredient(unittest.TestCase):
+    
+    def test_when_empty(self):
+        actual = mxp._test_ingredient('')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_whitespace(self):
+        actual = mxp._test_ingredient('                                                ')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_amount_misaligned_1(self):
+        actual = mxp._test_ingredient('2/3                Cup  Apples')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_amount_misaligned_2(self):
+        actual = mxp._test_ingredient('      2/3          Cup  Apples')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_measure_misaligned_1(self):
+        actual = mxp._test_ingredient('     2/3 Cup            Apples')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_measure_misaligned_2(self):
+        actual = mxp._test_ingredient('     2/3            Cup Apples')
+        expected = None
+        self.assertEqual(actual, expected)
+
+    def test_when_ingredient_misaligned(self):
+        actual = mxp._test_ingredient('     2/3           Cup Apples')
+        expected = None
+        self.assertEqual(actual, expected)
+    
+    def test_test_1(self):
+        actual = mxp._test_ingredient('     2/3           Cup  Apples')
+        expected = '{2/3} {Cup} {Apples} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_2(self):
+        actual = mxp._test_ingredient('       3                Apples')
+        expected = '{3} {} {Apples} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_3(self):
+        actual = mxp._test_ingredient('                  Some  Apples')
+        expected = '{} {Some} {Apples} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_4(self):
+        actual = mxp._test_ingredient('                        Apples')
+        expected = '{} {} {Apples} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_5(self):
+        actual = mxp._test_ingredient('  11 3/4  tablespoons+  Apple pie spice')
+        expected = '{11 3/4} {tablespoons+} {Apple pie spice} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_6(self):
+        actual = mxp._test_ingredient('     2/3           Cup      Apples    ')
+        expected = '{2/3} {Cup} {Apples} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_7(self):
+        actual = mxp._test_ingredient('     1/4           Cup  Margarine Or Butter -- softened')
+        expected = '{1/4} {Cup} {Margarine Or Butter} {softened}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_8(self):
+        actual = mxp._test_ingredient('                        -- softened')
+        expected = '{} {} {-- softened} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_9(self):
+        actual = mxp._test_ingredient('                            -- softened')
+        expected = '{} {} {-- softened} {}'
+        self.assertEqual(repr(actual), expected)
+    
+    def test_test_10(self):
+        actual = mxp._test_ingredient('     1/4           Cup  Margarine Or Butter--softened')
+        expected = '{1/4} {Cup} {Margarine Or Butter--softened} {}'
+        self.assertEqual(repr(actual), expected)
+
+
 if __name__ == '__main__':
     unittest.main()
