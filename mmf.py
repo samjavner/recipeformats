@@ -353,10 +353,10 @@ def _add_ingredients(ingredients, column1, column2):
         if ingredient.lstrip().startswith('-'):
             previous += ' ' + ingredient.lstrip()[1:].strip()
         else:
-            if previous:
+            if previous.lstrip():
                 ingredients.append(_get_ingredient(previous))
             previous = ingredient
-    if previous:
+    if previous.lstrip():
         ingredients.append(_get_ingredient(previous))
     column1[:] = [] # clear
     column2[:] = [] # clear
