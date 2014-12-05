@@ -313,6 +313,8 @@ def _test_ingredient(line):
     """Tests whether a line is an ingredient. Returns an Ingredient object or None."""
     if not line.strip():
         return None
+    if _is_mxp_footer(line):
+        return None
     match = _ingredient_re.match(line)
     if match:
         amount = match.group(1).strip()
