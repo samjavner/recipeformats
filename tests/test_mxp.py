@@ -3,6 +3,470 @@ import unittest
 from recipeformats import mxp
 
 
+class TestParseRecipe(unittest.TestCase):
+
+    def assert_equal(self, actual, expected_title, expected_recipe_by,
+                     expected_serving_size, expected_preparation_time,
+                     expected_categories, expected_ingredients,
+                     expected_directions, expected_notes):
+        actual_ingredients = [repr(i) for i in actual.ingredients]
+        self.assertEqual(actual.title, expected_title)
+        self.assertEqual(actual.recipe_by, expected_recipe_by)
+        self.assertEqual(actual.serving_size, expected_serving_size)
+        self.assertEqual(actual.preparation_time, expected_preparation_time)
+        self.assertEqual(actual.categories, expected_categories)
+        self.assertEqual(actual_ingredients, expected_ingredients)
+        self.assertEqual(actual.directions, expected_directions)
+        self.assertEqual(actual.notes, expected_notes)
+
+    # Variations on this recipe follow it.
+    def test_1(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            '',
+            'Description:',
+            '  "Description!"',
+            'Source:',
+            '  "Internet"',
+            'Copyright:',
+            '  "2014"',
+            'Yield:',
+            '  "1 cake"',
+            'Start to Finish Time:',
+            '  "2:22"',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            '',
+            'Per Serving (excluding unknown items): 149 Calories; 9g Fat (55.4% calories from fat); 10g Protein; 6g Carbohydrate; 0g Dietary Fiber; 229mg Cholesterol; 130mg Sodium.  Exchanges: 1 Lean Meat; 1/2 Non-Fat Milk; 1 Fat.',
+            '',
+            'Suggested Wine: Cabernet',
+            '',
+            'Serving Ideas : Serve me this way!',
+            '',
+            'NOTES : Notely notes notes.',
+            '',
+            'Nutr. Assoc. : 0 0 0 0 0 0 0',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            'Description:',
+            '"Description!"',
+            'Source:',
+            '"Internet"',
+            'Copyright:',
+            '"2014"',
+            'Yield:',
+            '"1 cake"',
+            'Start to Finish Time:',
+            '"2:22"',
+            ]
+        expected_notes = [
+            'Per Serving (excluding unknown items): 149 Calories; 9g Fat (55.4% calories from fat); 10g Protein; 6g Carbohydrate; 0g Dietary Fiber; 229mg Cholesterol; 130mg Sodium.  Exchanges: 1 Lean Meat; 1/2 Non-Fat Milk; 1 Fat.', 
+            'Suggested Wine: Cabernet',
+            'Serving Ideas : Serve me this way!',
+            'NOTES : Notely notes notes.',
+            'Nutr. Assoc. : 0 0 0 0 0 0 0',
+            ]
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_1_no_directions(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            '',
+            'Suggested Wine: Cabernet',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = []
+        expected_notes = [
+            'Suggested Wine: Cabernet'
+            ]
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+
+    def test_1_no_ingredients(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            '',
+            'Suggested Wine: Cabernet',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = []
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = [
+            'Suggested Wine: Cabernet'
+            ]
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_1_no_notes(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = []
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_1_extra_lines(self):
+        lines = [
+            '',
+            '',
+            '',
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            '',
+            'Serving Size  : 2     Preparation Time :1:25',
+            '',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            '',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            '',
+            '',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            '',
+            'Suggested Wine: Cabernet',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = [
+            'Suggested Wine: Cabernet',
+            ]
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+
+    def test_1_no_metadata(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            '',
+            'Suggested Wine: Cabernet',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = ''
+        expected_serving_size = ''
+        expected_preparation_time = ''
+        expected_categories = []
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = [
+            'Suggested Wine: Cabernet',
+            ]
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_1_no_header_and_footer(self):
+        lines = [
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '  Amount  Measure       Ingredient -- Preparation Method',
+            '--------  ------------  --------------------------------',
+            '                        Heading:',
+            '  1                cup  milk -- please',
+            '                            -- Heading:',
+            '     1/2           cup     ',
+            '  2                     eggs',
+            '                 pound     ',
+            '',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = [
+            '{} {} {Heading:} {}',
+            '{1} {cup} {milk} {please}',
+            '{} {} {-- Heading:} {}',
+            '{1/2} {cup} {} {}',
+            '{2} {} {eggs} {}',
+            '{} {pound} {} {}',
+            ]
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = []
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_1_only_header_footer_and_metadata(self):
+        lines = [
+            '* Exported from MasterCook *',
+            '',
+            '                               Test Recipe',
+            '',
+            'Recipe By     :Sam',
+            'Serving Size  : 2     Preparation Time :1:25',
+            'Categories    : Burgers                         Fish',
+            '                Meat',
+            '',
+            '                                    - - - - - - - - - - - - - - - - - - - ',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = 'Sam'
+        expected_serving_size = '2'
+        expected_preparation_time = '1:25'
+        expected_categories = ['Burgers', 'Fish', 'Meat']
+        expected_ingredients = []
+        expected_directions = []
+        expected_notes = []
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+    
+    def test_when_empty(self):
+        lines = []
+        expected_title = ''
+        expected_recipe_by = ''
+        expected_serving_size = ''
+        expected_preparation_time = ''
+        expected_categories = []
+        expected_ingredients = []
+        expected_directions = []
+        expected_notes = []
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+
+    def test_when_just_some_text(self):
+        lines = [
+            '                               Test Recipe',
+            'Direction 1.',
+            '',
+            'Direction 2.',
+            ]
+        expected_title = 'Test Recipe'
+        expected_recipe_by = ''
+        expected_serving_size = ''
+        expected_preparation_time = ''
+        expected_categories = []
+        expected_ingredients = []
+        expected_directions = [
+            'Direction 1.',
+            'Direction 2.',
+            ]
+        expected_notes = []
+        actual = mxp.parse_recipe(lines)
+        self.assert_equal(actual, expected_title, expected_recipe_by,
+                          expected_serving_size, expected_preparation_time,
+                          expected_categories, expected_ingredients,
+                          expected_directions, expected_notes)
+
+
 class TestIsMxpHeader(unittest.TestCase):
 
     def test_when_empty(self):
@@ -227,6 +691,11 @@ class TestTestIngredient(unittest.TestCase):
     
     def test_when_empty(self):
         actual = mxp._test_ingredient('')
+        expected = None
+        self.assertEqual(actual, expected)
+    
+    def test_when_footer(self):
+        actual = mxp._test_ingredient('                                    - - - - - - - - - - - - - - - - - - - ')
         expected = None
         self.assertEqual(actual, expected)
 
