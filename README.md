@@ -1,10 +1,11 @@
 Parsing for recipe file formats.
 
-* Meal-Master format (.mmf)
+* Meal-Master (.mmf)
 * MasterCook 1-4 (.mxp)
 * MasterCook 5+ (.mx2)
+* Living Cookbook (Food Data Exchange) (.fdx)
 
-More formats to come.
+Work in progress. More formats to come.
 
 ## License
 
