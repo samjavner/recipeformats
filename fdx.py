@@ -5,8 +5,9 @@ Use parse_file to parse a file.
 
 import xml.etree.ElementTree as ET
 
-__all__ = ['parse_file', 'Recipe', 'Ingredient', 'Procedure', 'AuthorNote', 'Tip',
-           'Review', 'Measure', 'Image']
+__all__ = ['parse_file', 'Recipe', 'RecipeIngredient', 'RecipeProcedure',
+           'RecipeAuthorNote', 'RecipeTip', 'RecipeReview', 'RecipeMeasure',
+           'RecipeImage']
 
 
 def parse_file(filename):
