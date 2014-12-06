@@ -5,8 +5,21 @@ Use parse_file to parse a file.
 
 import xml.etree.ElementTree as ET
 
-__all__ = ['Recipe', 'Ingredient', 'Procedure', 'AuthorNote', 'Tip',
-           'Review', 'Measure', 'Image', 'parse_file']
+__all__ = ['parse_file', 'Recipe', 'Ingredient', 'Procedure', 'AuthorNote', 'Tip',
+           'Review', 'Measure', 'Image']
+
+
+def parse_file(filename):
+    """Parses a .fdx file.
+
+    Args:
+        filename: File name of the .fdx file to parse.
+
+    Returns: 
+        A list of Recipe objects.
+    """
+    fdx = ET.parse(filename).getroot()
+    return [Recipe.parse(e) for e in fdx.findall('./Recipes/Recipe')]
 
 
 class Recipe:
@@ -36,15 +49,15 @@ class Recipe:
         color_flag: Color flag string (one of '<None>', 'Red', 'Blue',
             'Yellow', 'Green', 'Orange', or 'Purple').
         create_date: Creation date string ('YYYY-MM-DD' format).
-        recipe_image: Image object for main recipe image or None.
-        source_image: Image object for recipe source or None.
-        ingredients: List of Ingredient objects.
-        procedures: List of Procedure objects.
-        author_notes: List of AuthorNote objects.
-        tips: List of Tip objects.
-        reviews: List of Review objects.
-        measures: List of Measure objects.
-        images: List of Image objects.
+        recipe_image: RecipeImage object for main recipe image or None.
+        source_image: RecipeImage object for recipe source or None.
+        ingredients: List of RecipeIngredient objects.
+        procedures: List of RecipeProcedure objects.
+        author_notes: List of RecipeAuthorNote objects.
+        tips: List of RecipeTip objects.
+        reviews: List of RecipeReview objects.
+        measures: List of RecipeMeasure objects.
+        images: List of RecipeImage objects.
         user_data: List of custom user data with length 15 (items may be empty).
         nutrition: Dictionary of nutrition values.
             Keys are nutrient strings (e.g. 'VitaminA').
@@ -52,7 +65,6 @@ class Recipe:
     """
 
     def __init__(self):
-        """Initializes Recipe with default values."""
         self.name = ''
         self.id = ''
         self.cookbook_id = ''
@@ -75,8 +87,8 @@ class Recipe:
         self.comments = ''
         self.color_flag = ''
         self.create_date = ''
-        self.recipe_image = ''
-        self.source_image = ''
+        self.recipe_image = None
+        self.source_image = None
         self.ingredients = []
         self.procedures = []
         self.author_notes = []
@@ -87,8 +99,46 @@ class Recipe:
         self.user_data = [''] * 15
         self.nutrition = {}
 
+    @staticmethod
+    def parse(r):
+        recipe = Recipe()
+        recipe.name = r.get('Name', '')
+        recipe.id = r.get('ID', '')
+        recipe.cookbook_id = r.get('CookbookID', '')
+        recipe.cookbook_chapter_id = r.get('CookbookChapterID', '')
+        recipe.servings = r.get('Servings', '')
+        recipe.yield_ = r.get('Yield', '')
+        recipe.oven_temperature_f = r.get('OvenTemperatureF', '')
+        recipe.oven_temperature_c = r.get('OvenTemperatureC', '')
+        recipe.preparation_time = r.get('PreparationTime', '')
+        recipe.cooking_time = r.get('CookingTime', '')
+        recipe.inactive_time = r.get('InactiveTime', '')
+        recipe.ready_in_time = r.get('ReadyInTime', '')
+        recipe.degree_of_difficulty = r.get('DegreeOfDifficulty', '')
+        recipe.recipe_types = r.get('RecipeTypes', '')
+        recipe.author = r.get('Author', '')
+        recipe.source = r.get('Source', '')
+        recipe.source_page_number = r.get('SourcePageNumber', '')
+        recipe.web_page = r.get('WebPage', '')
+        recipe.copyright = r.get('Copyright', '')
+        recipe.comments = r.get('Comments', '')
+        recipe.color_flag = r.get('ColorFlag', '')
+        recipe.create_date = r.get('CreateDate', '')
+        recipe.recipe_image = RecipeImage.find_and_parse(r, 'RecipeImage')
+        recipe.source_image = RecipeImage.find_and_parse(r, 'SourceImage')
+        recipe.ingredients = [RecipeIngredient.parse(e) for e in r.findall('./RecipeIngredients/RecipeIngredient')]
+        recipe.procedure = [RecipeProcedure.parse(e) for e in r.findall('./RecipeProcedures/RecipeProcedure')]
+        recipe.author_notes = [RecipeAuthorNote.parse(e) for e in r.findall('./RecipeAuthorNotes/RecipeAuthorNote')]
+        recipe.tips = [RecipeTip.parse(e) for e in r.findall('./RecipeTips/RecipeTip')]
+        recipe.reviews = [RecipeReview.parse(e) for e in r.findall('./RecipeReviews/RecipeReview')]
+        recipe.measures = [RecipeMeasure.parse(e) for e in r.findall('./RecipeMeasures/RecipeMeasure')]
+        recipe.images = [RecipeImage.parse(e) for e in r.findall('./RecipeImages/RecipeImages')]
+        recipe.nutrition = {name: value for name, value in _find(r, 'RecipeNutrition').items()}
+        recipe.user_data = [r.get('UserData' + str(i + 1), '') for i in range(15)]
+        return recipe
 
-class Ingredient:
+
+class RecipeIngredient:
     """Represents an ingredient in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -112,7 +162,6 @@ class Ingredient:
     """
 
     def __init__(self):
-        """Initializes Ingredient with default values."""
         self.quantity = ''
         self.unit = ''
         self.ingredient = ''
@@ -127,8 +176,26 @@ class Ingredient:
         self.recipe_id = ''
         self.recipe_name = ''
 
+    @staticmethod
+    def parse(e):
+        ingredient = RecipeIngredient()
+        ingredient.quantity = e.get('Quantity', '')
+        ingredient.unit = e.get('Unit', '')
+        ingredient.ingredient = e.get('Ingredient', '')
+        ingredient.heading = e.get('Heading', '')
+        ingredient.link_type = e.get('LinkType', '')
+        ingredient.ingredient_id = e.get('IngredientID', '')
+        ingredient.ingredient_name = e.get('IngredientName', '')
+        ingredient.measure_id = e.get('MeasureID', '')
+        ingredient.measure = e.get('Measure', '')
+        ingredient.measure_quantity = e.get('MeasureQuantity', '')
+        ingredient.measure_gram_weight = e.get('MeasureGramWeight', '')
+        ingredient.recipe_id = e.get('RecipeID', '')
+        ingredient.recipe_name = e.get('RecipeName', '')
+        return ingredient
 
-class Procedure:
+
+class RecipeProcedure:
     """Represents a procedure in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -138,13 +205,20 @@ class Procedure:
     """
 
     def __init__(self):
-        """Initializes Procedure with default values."""
         self.procedure_text = ''
         self.heading = ''
-        self.procedure_image = ''
+        self.procedure_image = None
+
+    @staticmethod
+    def parse(e):
+        procedure = RecipeProcedure()
+        procedure.procedure_text = e.findtext('ProcedureText', '').strip()
+        procedure.heading = e.get('Heading', '')
+        procedure.procedure_image = RecipeImage.find_and_parse(e, 'ProcedureImage')
+        return procedure
 
 
-class AuthorNote:
+class RecipeAuthorNote:
     """Represents an author note in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -153,12 +227,18 @@ class AuthorNote:
     """
 
     def __init__(self):
-        """Initializes AuthorNote with default values."""
         self.text = ''
         self.heading = ''
 
+    @staticmethod
+    def parse(e):
+        author_note = RecipeAuthorNote()
+        author_note.text = e.text.strip()
+        author_note.heading = e.get('Heading', '')
+        return author_note
 
-class Tip:
+
+class RecipeTip:
     """Represents a tip in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -167,12 +247,18 @@ class Tip:
     """
 
     def __init__(self):
-        """Initializes Tip with default values."""
         self.text = ''
         self.heading = ''
 
+    @staticmethod
+    def parse(e):
+        tip = RecipeTip()
+        tip.text = e.text.strip()
+        tip.heading = e.get('Heading', '')
+        return tip
 
-class Review:
+
+class RecipeReview:
     """Represents a review in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -182,13 +268,20 @@ class Review:
     """
 
     def __init__(self):
-        """Initializes Review with default values."""
         self.review_date = ''
         self.rating = ''
         self.reviewer = ''
 
+    @staticmethod
+    def parse(e):
+        review = RecipeReview()
+        review.review_date = e.get('ReviewDate', '')
+        review.rating = e.get('Rating', '')
+        review.reviewer = e.get('Reviewer', '')
+        return review
 
-class Measure:
+
+class RecipeMeasure:
     """Represents a recipe measurement in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -200,14 +293,22 @@ class Measure:
     """
 
     def __init__(self):
-        """Initializes Measure with default values."""
         self.measure_id = ''
         self.description = ''
         self.gram_weight = ''
         self.measure_type = ''
 
+    @staticmethod
+    def parse(e):
+        measure = RecipeMeasure()
+        measure.measure_id = e.get('MeasureID', '')
+        measure.description = e.get('Description', '')
+        measure.gram_weight = e.get('GramWeight', '')
+        measure.measure_type = e.get('MeasureType', '')
+        return measure
 
-class Image:
+
+class RecipeImage:
     """Represents an image in a Food Data Exchange .fdx file.
 
     Attributes:
@@ -218,7 +319,6 @@ class Image:
     """
 
     def __init(self):
-        """Initializes Image with default values."""
         self.value = ''
         self.file_type = ''
         self.description = ''
@@ -226,202 +326,21 @@ class Image:
     def __repr__(self):
         return "{%s} {%s} {%s}" % (self.file_type, self.description, self.value[:50] + '...')
 
+    @staticmethod
+    def find_and_parse(element, tag):
+        image = element.find(tag)
+        if image is None:
+            return None
+        else:
+            return RecipeImage.parse(image)
 
-def parse_file(filename):
-    """Parses a .fdx file.
-
-    Args:
-        filename: File name of the .fdx file to parse.
-
-    Returns: 
-        A list of Recipe objects.
-    """
-    fdx = ET.parse(filename).getroot()
-    return _parse_recipes(fdx)
-
-
-def _parse_recipes(fdx):
-    """Parses a list of Recipe objects from a 'fdx' Element."""
-    recipes = []
-    for r in _find(fdx, 'Recipes').findall('Recipe'):
-        recipes.append(_parse_recipe(r))
-    return recipes
-
-
-def _parse_recipe(r):
-    """Parses a Recipe from a 'Recipe' Element."""
-    recipe = Recipe()
-    recipe.name = r.get('Name', '')
-    recipe.id = r.get('ID', '')
-    recipe.cookbook_id = r.get('CookbookID', '')
-    recipe.cookbook_chapter_id = r.get('CookbookChapterID', '')
-    recipe.servings = r.get('Servings', '')
-    recipe.yield_ = r.get('Yield', '')
-    recipe.oven_temperature_f = r.get('OvenTemperatureF', '')
-    recipe.oven_temperature_c = r.get('OvenTemperatureC', '')
-    recipe.preparation_time = r.get('PreparationTime', '')
-    recipe.cooking_time = r.get('CookingTime', '')
-    recipe.inactive_time = r.get('InactiveTime', '')
-    recipe.ready_in_time = r.get('ReadyInTime', '')
-    recipe.degree_of_difficulty = r.get('DegreeOfDifficulty', '')
-    recipe.recipe_types = r.get('RecipeTypes', '')
-    recipe.author = r.get('Author', '')
-    recipe.source = r.get('Source', '')
-    recipe.source_page_number = r.get('SourcePageNumber', '')
-    recipe.web_page = r.get('WebPage', '')
-    recipe.copyright = r.get('Copyright', '')
-    recipe.comments = r.get('Comments', '')
-    recipe.color_flag = r.get('ColorFlag', '')
-    recipe.create_date = r.get('CreateDate', '')
-    recipe.recipe_image = _parse_image(_find(r, 'RecipeImage'))
-    recipe.source_image = _parse_image(_find(r, 'SourceImage'))
-    recipe.ingredients = _parse_ingredients(r)
-    recipe.procedures = _parse_procedures(r)
-    recipe.author_notes = _parse_author_notes(r)
-    recipe.tips = _parse_tips(r)
-    recipe.reviews = _parse_reviews(r)
-    recipe.measures = _parse_measures(r)
-    recipe.images = _parse_images(r)
-    recipe.nutrition = _parse_nutrition(r)
-    for i in range(15):
-        recipe.user_data[i] = r.get('UserData' + str(i + 1), '')
-    return recipe
-
-
-def _parse_ingredients(r):
-    ingredients = []
-    for recipe_ingredients in r.findall('RecipeIngredients'):
-        for recipe_ingredient in recipe_ingredients.findall('RecipeIngredient'):
-            ingredient = _parse_ingredient(recipe_ingredient)
-            ingredients.append(ingredient)
-    return ingredients
-
-
-def _parse_ingredient(i):
-    ingredient = Ingredient()
-    ingredient.quantity = i.get('Quantity', '')
-    ingredient.unit = i.get('Unit', '')
-    ingredient.ingredient = i.get('Ingredient', '')
-    ingredient.heading = i.get('Heading', '')
-    ingredient.link_type = i.get('LinkType', '')
-    ingredient.ingredient_id = i.get('IngredientID', '')
-    ingredient.ingredient_name = i.get('IngredientName', '')
-    ingredient.measure_id = i.get('MeasureID', '')
-    ingredient.measure = i.get('Measure', '')
-    ingredient.measure_quantity = i.get('MeasureQuantity', '')
-    ingredient.measure_gram_weight = i.get('MeasureGramWeight', '')
-    ingredient.recipe_id = i.get('RecipeID', '')
-    ingredient.recipe_name = i.get('RecipeName', '')
-    return ingredient
-
-
-def _parse_procedures(r):
-    procedures = []
-    for recipe_procedures in r.findall('RecipeProcedures'):
-        for recipe_procedure in recipe_procedures.findall('RecipeProcedure'):
-            procedure = _parse_procedure(recipe_procedure)
-            procedures.append(procedure)
-    return procedures
-
-
-def _parse_procedure(p):
-    procedure = Procedure()
-    procedure.procedure_text = p.findtext('ProcedureText', '').strip()
-    procedure.heading = p.get('Heading', '')
-    procedure.procedure_image = _parse_image(_find(p, 'ProcedureImage'))
-    return procedure
-
-
-def _parse_author_notes(r):
-    author_notes = []
-    for recipe_author_notes in r.findall('RecipeAuthorNotes'):
-        for recipe_author_note in recipe_author_notes.findall('RecipeAuthorNote'):
-            author_note = _parse_author_note(recipe_author_note)
-            author_notes.append(author_note)
-    return author_notes
-
-
-def _parse_author_note(n):
-    author_note = AuthorNote()
-    author_note.text = n.text.strip()
-    author_note.heading = n.get('Heading', '')
-    return author_note
-
-
-def _parse_tips(r):
-    tips = []
-    for recipe_tips in r.findall('RecipeTips'):
-        for recipe_tip in recipe_tips.findall('RecipeTip'):
-            tip = _parse_tip(recipe_tip)
-            tips.append(tip)
-    return tips
-
-
-def _parse_tip(n):
-    tip = Tip()
-    tip.text = n.text.strip()
-    tip.heading = n.get('Heading', '')
-    return tip
-
-
-def _parse_reviews(r):
-    reviews = []
-    for recipe_reviews in r.findall('RecipeReviews'):
-        for recipe_review in recipe_reviews.findall('RecipeReview'):
-            review = _parse_review(recipe_review)
-            reviews.append(review)
-    return reviews
-
-
-def _parse_review(r):
-    review = Review()
-    review.review_date = r.get('ReviewDate', '')
-    review.rating = r.get('Rating', '')
-    review.reviewer = r.get('Reviewer', '')
-    return review
-
-
-def _parse_measures(r):
-    measures = []
-    for recipe_measures in r.findall('RecipeMeasures'):
-        for recipe_measure in recipe_measures.findall('RecipeMeasure'):
-            measure = _parse_measure(recipe_measure)
-            measures.append(measure)
-    return measures
-
-
-def _parse_measure(m):
-    measure = Measure()
-    measure.measure_id = m.get('MeasureID', '')
-    measure.description = m.get('Description', '')
-    measure.gram_weight = m.get('GramWeight', '')
-    measure.measure_type = m.get('MeasureType', '')
-    return measure
-
-
-def _parse_images(r):
-    images = []
-    for recipe_images in r.findall('RecipeImages'):
-        for recipe_image in recipe_images.findall('RecipeImage'):
-            image = _parse_image(recipe_image)
-            images.append(image)
-    return images
-
-
-def _parse_image(i):
-    """Returns an Image object or None if there is no text content."""
-    image = Image()
-    if not i.text:
-        return None
-    image.value = i.text.strip()
-    image.file_type = i.get('FileType', '')
-    image.description = i.get('Description', '')
-    return image
-
-
-def _parse_nutrition(r):
-    """Returns a dictionary of nutrition attributes and values."""
-    return {name: value for name, value in _find(r, 'RecipeNutrition').items()}
+    @staticmethod
+    def parse(e):
+        image = RecipeImage()
+        image.value = e.text.strip()
+        image.file_type = e.get('FileType', '')
+        image.description = e.get('Description', '')
+        return image
 
 
 def _find(element, tag):
