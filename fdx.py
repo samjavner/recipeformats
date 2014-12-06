@@ -1,9 +1,58 @@
+"""Recipe parsing for Food Data Exchange (Living Cookbook) format (.fdx) files.
+
+Use parse_file to parse a file.
+"""
+
 import xml.etree.ElementTree as ET
+
+__all__ = ['Recipe', 'Ingredient', 'Procedure', 'AuthorNote', 'Tip',
+           'Review', 'Measure', 'Image', 'parse_file']
 
 
 class Recipe:
+    """Represents a recipe in a Food Data Exchange .fdx file.
+
+    Attributes:
+        name: Name string.
+        id: Id string - can be reference from ingredients of another recipe.
+        cookbook_id: Id string of cookbook.
+        cookbook_chapter_id: Id string of cookbook chapter.
+        servings: Number of servings string (perhaps empty).
+        yield_: Yield string (e.g. 24 cupcakes) (perhaps empty).
+        oven_temperature_f: Oven temperature in degrees F (perhaps empty).
+        oven_temperature_c: Oven temperature in degrees C (perhaps empty).
+        preparation_time: Preparation time in minutes as a string (perhaps empty).
+        cooking_time: Cooking time in minutes as a string (perhaps empty).
+        inactive_time: Inactive time in minutes as a string (perhaps empty).
+        ready_in_time: Ready in time in minutes as a string (perhaps empty).
+        degree_of_difficulty: Difficulty (1-5) as a string (perhaps empty).
+        recipe_types: Recipe types as a comma separated string (perhaps empty).
+        author: Author string (perhaps empty).
+        source: Source string (perhaps empty).
+        source_page_number: Source page number string (perhaps empty).
+        web_page: Web page string (perhaps empty).
+        copyright: Copyright string (perhaps empty).
+        comments: Comments string (perhaps empty).
+        color_flag: Color flag string (one of '<None>', 'Red', 'Blue',
+            'Yellow', 'Green', 'Orange', or 'Purple').
+        create_date: Creation date string ('YYYY-MM-DD' format).
+        recipe_image: Image object for main recipe image or None.
+        source_image: Image object for recipe source or None.
+        ingredients: List of Ingredient objects.
+        procedures: List of Procedure objects.
+        author_notes: List of AuthorNote objects.
+        tips: List of Tip objects.
+        reviews: List of Review objects.
+        measures: List of Measure objects.
+        images: List of Image objects.
+        user_data: List of custom user data with length 15 (items may be empty).
+        nutrition: Dictionary of nutrition values.
+            Keys are nutrient strings (e.g. 'VitaminA').
+            Values are decimal string in the nutrient's standard units (e.g. '1.25')
+    """
 
     def __init__(self):
+        """Initializes Recipe with default values."""
         self.name = ''
         self.id = ''
         self.cookbook_id = ''
@@ -40,8 +89,30 @@ class Recipe:
 
 
 class Ingredient:
+    """Represents an ingredient in a Food Data Exchange .fdx file.
+
+    Attributes:
+        quantity: Amount string (perhaps empty) (e.g. '2').
+        unit: Unit of measure string (perhaps empty) (e.g. 'cups').
+        ingredient: Ingredient part string (e.g. 'milk').
+        heading: Heading string ('Y' or 'N').
+        link_type: Link type string:
+            '', 'Recipe', 'NoLink', 'Ingredient', 'Unlinked', others?
+        ingredient_id: ID string of linked ingredient when link_type == 'Ingredient'.
+        ingredient_name: Name string of linked ingredient when link_type == 'Ingredient'.
+        measure_id: ID string of measure when link_type == 'Ingredient'.
+        measure: Quantity string of measure when link_type == 'Ingredient'.
+        measure_gram_weight: Equivalent number of grams as a string when link_type == 'Ingredient'.
+            Equivalent to the measure given in measure.
+        measure_quantity: Number (as a string) to multiply by measure or
+            measure_gram_weight to get the total quantity when link_type == 'Ingredient'.
+            Number (as a string) of recipe servings when link_type == 'Recipe'.
+        recipe_id: ID string of linekd recipe when link_type == 'Recipe'.
+        recipe_name: Name string of linked recipe when link_type == 'Recipe'.
+    """
 
     def __init__(self):
+        """Initializes Ingredient with default values."""
         self.quantity = ''
         self.unit = ''
         self.ingredient = ''
@@ -51,45 +122,85 @@ class Ingredient:
         self.ingredient_name = ''
         self.measure_id = ''
         self.measure = ''
-        self.measure_quantity = ''
         self.measure_gram_weight = ''
+        self.measure_quantity = ''
         self.recipe_id = ''
         self.recipe_name = ''
 
 
 class Procedure:
+    """Represents a procedure in a Food Data Exchange .fdx file.
+
+    Attributes:
+        procedure_text: Text string.
+        heading: Heading string ('Y' or 'N').
+        image: Image object or None.
+    """
 
     def __init__(self):
+        """Initializes Procedure with default values."""
         self.procedure_text = ''
         self.heading = ''
         self.procedure_image = ''
 
 
-class Tip:
+class AuthorNote:
+    """Represents an author note in a Food Data Exchange .fdx file.
+
+    Attributes:
+        text: Text string.
+        heading: Heading string ('True' or '')
+    """
 
     def __init__(self):
+        """Initializes AuthorNote with default values."""
         self.text = ''
         self.heading = ''
 
 
 class Tip:
+    """Represents a tip in a Food Data Exchange .fdx file.
+
+    Attributes:
+        text: Text string.
+        heading: Heading string ('True' or '')
+    """
 
     def __init__(self):
+        """Initializes Tip with default values."""
         self.text = ''
         self.heading = ''
 
 
 class Review:
+    """Represents a review in a Food Data Exchange .fdx file.
+
+    Attributes:
+        review_date: Date string ('YYYY-MM-DD' format).
+        rating: Rating (0-5) as a string.
+        reviewer: Name of reviewer string.
+    """
 
     def __init__(self):
+        """Initializes Review with default values."""
         self.review_date = ''
         self.rating = ''
         self.reviewer = ''
 
 
 class Measure:
+    """Represents a recipe measurement in a Food Data Exchange .fdx file.
+
+    Attributes:
+        measure_id: ID string.
+        description: Description string (e.g. '1 cup').
+        gram_weight: Gram weight string (e.g. '300').
+        measure_type: Measure type string:
+            'Volume', 'Mass', 'Weight (Mass)', 'Unit', others?
+    """
 
     def __init__(self):
+        """Initializes Measure with default values."""
         self.measure_id = ''
         self.description = ''
         self.gram_weight = ''
@@ -97,8 +208,17 @@ class Measure:
 
 
 class Image:
+    """Represents an image in a Food Data Exchange .fdx file.
+
+    Attributes:
+        value: Bytes of image file encoded as a base 64 string.
+        file_type: Extension of image file name (e.g. 'JPG', 'GIF').
+        description: Description string for image.
+            (only used for Recipe.images; not recipe_image, source_image, or procedure_image)
+    """
 
     def __init(self):
+        """Initializes Image with default values."""
         self.value = ''
         self.file_type = ''
         self.description = ''
@@ -108,18 +228,28 @@ class Image:
 
 
 def parse_file(filename):
+    """Parses a .fdx file.
+
+    Args:
+        filename: File name of the .fdx file to parse.
+
+    Returns: 
+        A list of Recipe objects.
+    """
     fdx = ET.parse(filename).getroot()
-    return parse_recipes(fdx)
+    return _parse_recipes(fdx)
 
 
-def parse_recipes(fdx):
+def _parse_recipes(fdx):
+    """Parses a list of Recipe objects from a 'fdx' Element."""
     recipes = []
     for r in _find(fdx, 'Recipes').findall('Recipe'):
-        recipes.append(parse_recipe(r))
+        recipes.append(_parse_recipe(r))
     return recipes
 
 
-def parse_recipe(r):
+def _parse_recipe(r):
+    """Parses a Recipe from a 'Recipe' Element."""
     recipe = Recipe()
     recipe.name = r.get('Name', '')
     recipe.id = r.get('ID', '')
@@ -204,15 +334,15 @@ def _parse_procedure(p):
 
 def _parse_author_notes(r):
     author_notes = []
-    for recipe_author_notes in r.findall('RecipeTips'):
-        for recipe_author_note in recipe_author_notes.findall('RecipeTip'):
+    for recipe_author_notes in r.findall('RecipeAuthorNotes'):
+        for recipe_author_note in recipe_author_notes.findall('RecipeAuthorNote'):
             author_note = _parse_author_note(recipe_author_note)
             author_notes.append(author_note)
     return author_notes
 
 
 def _parse_author_note(n):
-    author_note = Tip()
+    author_note = AuthorNote()
     author_note.text = n.text.strip()
     author_note.heading = n.get('Heading', '')
     return author_note
@@ -279,6 +409,7 @@ def _parse_images(r):
 
 
 def _parse_image(i):
+    """Returns an Image object or None if there is no text content."""
     image = Image()
     if not i.text:
         return None
@@ -289,6 +420,7 @@ def _parse_image(i):
 
 
 def _parse_nutrition(r):
+    """Returns a dictionary of nutrition attributes and values."""
     return {name: value for name, value in _find(r, 'RecipeNutrition').items()}
 
 
